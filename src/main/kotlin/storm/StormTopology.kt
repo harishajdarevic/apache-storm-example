@@ -27,7 +27,7 @@ class StormTopology {
 
             cluster.submitTopology("topologija", conf, builder.createTopology())
 
-            Thread.sleep(10000)
+            Thread.sleep(240000)
 
             cluster.killTopology("topology")
         }
