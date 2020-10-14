@@ -13,13 +13,13 @@ class StormTopology {
         fun main(args: Array<String>) {
             val builder = TopologyBuilder()
 
-            builder.setSpout("address", AddressSpout(), 1)
+            builder.setSpout("address", AddressSpout(), 10)
 
-            builder.setBolt("save-address", SaveAddressBolt(), 1).shuffleGrouping("address")
+            builder.setBolt("save-address", SaveAddressBolt(), 10).shuffleGrouping("address")
 
             val conf = Config()
-//            conf.setNumWorkers(3)
-//            conf.setMaxTaskParallelism(3)
+//            conf.setNumWorkers(2000)
+//            conf.setMaxTaskParallelism(2000)
             conf.setDebug(true)
 
             val cluster = LocalCluster()
@@ -27,9 +27,9 @@ class StormTopology {
 
             cluster.submitTopology("topologija", conf, builder.createTopology())
 
-            Thread.sleep(240000)
+            Thread.sleep(540000)
 
-            cluster.killTopology("topology")
+            cluster.killTopology("topologija")
         }
     }
 

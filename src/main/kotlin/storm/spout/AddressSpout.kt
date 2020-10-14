@@ -1,6 +1,7 @@
 package storm.spout
 
 import com.lambdaworks.redis.RedisClient
+import com.lambdaworks.redis.RedisConnection
 import com.lambdaworks.redis.pubsub.RedisPubSubAdapter
 import com.lambdaworks.redis.pubsub.RedisPubSubConnection
 import com.lambdaworks.redis.pubsub.RedisPubSubListener
@@ -18,9 +19,8 @@ class AddressSpout: BaseRichSpout() {
 
     private var collector: SpoutOutputCollector? = null
     lateinit var _rand: Random
-    lateinit var redisPubSubConnection: RedisPubSubConnection<String, String>
     lateinit var redisClient: RedisClient
-
+    lateinit var redisConnection: RedisConnection<String, String>
 
 
     override fun open(
@@ -30,23 +30,24 @@ class AddressSpout: BaseRichSpout() {
     ) {
         collector = sportOutputCollector
         _rand = Random()
+
+        // redis
+        redisClient = RedisClient("localhost", 7777)
+        redisConnection = redisClient.connect()
     }
 
-
     override fun nextTuple() {
-        Utils.sleep(15000)
+        Utils.sleep(200)
+        println("##### NEXT TUPLE ######")
+        val redisQueueData = redisConnection.rpoplpush("data", "destination")
 
-        redisClient = RedisClient("localhost", 7777)
-        val redisPubSubConnection = redisClient.connectPubSub()
-
-        val listener: RedisPubSubListener<String, String> = object : RedisPubSubAdapter<String, String>() {
-            override fun message(channel: String, message: String) {
-                collector?.emit(Values(message))
-            }
+        if(redisQueueData.isNullOrEmpty()) {
+            return
+        } else {
+            collector?.emit(Values(redisQueueData))
         }
 
-        redisPubSubConnection.addListener(listener)
-        redisPubSubConnection.subscribe("data")
+        Thread.yield()
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer?) {
