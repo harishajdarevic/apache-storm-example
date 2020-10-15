@@ -3,8 +3,8 @@ package storm
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
-import storm.bolt.SaveAddressBolt
-import storm.spout.AddressSpout
+import storm.bolt.SaveTeamBolt
+import storm.spout.TeamSpout
 
 class StormTopology {
 
@@ -13,13 +13,16 @@ class StormTopology {
         fun main(args: Array<String>) {
             val builder = TopologyBuilder()
 
-            builder.setSpout("address", AddressSpout(), 10)
+//            builder.setSpout("team", TeamSpout(), 10)
+//            builder.setSpout("team", TeamSpout(), 25)
+            builder.setSpout("team", TeamSpout(), 50)
 
-            builder.setBolt("save-address", SaveAddressBolt(), 10).shuffleGrouping("address")
+//            builder.setBolt("save-team", SaveTeamBolt(), 10).shuffleGrouping("team")
+//            builder.setBolt("save-team", SaveTeamBolt(), 100).shuffleGrouping("team")
+            builder.setBolt("save-team", SaveTeamBolt(), 250).shuffleGrouping("team")
 
             val conf = Config()
-//            conf.setNumWorkers(2000)
-//            conf.setMaxTaskParallelism(2000)
+
             conf.setDebug(true)
 
             val cluster = LocalCluster()
