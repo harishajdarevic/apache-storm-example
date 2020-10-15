@@ -21,7 +21,7 @@ class SaveTeamBolt: BaseRichBolt() {
     }
 
     override fun execute(tuple: Tuple?) {
-//        Utils.sleep(5000)
+        Utils.sleep(14000)
         collector?.ack(tuple)
     }
 

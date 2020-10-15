@@ -14,10 +14,12 @@ class StormTopology {
             val builder = TopologyBuilder()
 
 //            builder.setSpout("team", TeamSpout(), 10)
-            builder.setSpout("team", TeamSpout(), 20)
+            builder.setSpout("team", TeamSpout(), 50)
+
 
 //            builder.setBolt("save-team", SaveTeamBolt(), 10).shuffleGrouping("team")
-            builder.setBolt("save-team", SaveTeamBolt(), 100).shuffleGrouping("team")
+            builder.setBolt("save-team", SaveTeamBolt(), 50).shuffleGrouping("team")
+
 
 
             val conf = Config()

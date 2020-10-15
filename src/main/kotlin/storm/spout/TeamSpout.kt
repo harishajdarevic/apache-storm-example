@@ -37,21 +37,21 @@ class TeamSpout: BaseRichSpout() {
     }
 
     override fun ack(team: Any?) {
-//        Utils.sleep(500)
-        println("############################################### ACK #########")
-        redisConnection.rpush("team", team.toString())
+        Utils.sleep(500)
+        println("tupple successfully processed")
+//        redisConnection.rpush("team", team.toString())
     }
 
     override fun nextTuple() {
-//        Utils.sleep(7500)
-        val sportString = redisConnection.rpop("data")
+        Utils.sleep(500)
+        val sportString = redisConnection.rpoplpush("data", "team")
 
         if (sportString.isNullOrEmpty()) {
             return
         } else {
-//            collector?.emit(Values(sportString))
+            collector?.emit(Values(sportString))
             // Anchored ( ack )
-            collector?.emit(Values(sportString), sportString)
+//            collector?.emit(Values(sportString), sportString)
         }
 
         Thread.yield()
