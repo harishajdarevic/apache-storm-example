@@ -14,21 +14,15 @@ import org.apache.storm.utils.Utils
 class SaveTeamBolt: BaseRichBolt() {
 
     private var collector: OutputCollector? = null
-    lateinit var redisClient: RedisClient
-    lateinit var redisConnection: RedisConnection<String, String>
 
 
     override fun prepare(topoConf: MutableMap<String, Any>?, context: TopologyContext?, outputCollector: OutputCollector) {
         collector = outputCollector
-
-        redisClient = RedisClient("localhost", 7777)
-        redisConnection = redisClient.connect()
     }
 
     override fun execute(tuple: Tuple?) {
-        Utils.sleep(13000)
-        println("TUPLE U BOLTU: ${tuple?.getString(0)}")
-//        redisConnection.rpush("team", tuple?.getString(0))
+//        Utils.sleep(5000)
+        collector?.ack(tuple)
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer?) {

@@ -23,7 +23,6 @@ class TeamSpout: BaseRichSpout() {
     lateinit var _rand: Random
     lateinit var redisClient: RedisClient
     lateinit var redisConnection: RedisConnection<String, String>
-    lateinit var gson: Gson
 
     override fun open(
         conf: MutableMap<String, Any>?,
@@ -37,18 +36,22 @@ class TeamSpout: BaseRichSpout() {
         redisConnection = redisClient.connect()
     }
 
-    override fun ack(msgId: Any?) {
-
+    override fun ack(team: Any?) {
+//        Utils.sleep(500)
+        println("############################################### ACK #########")
+        redisConnection.rpush("team", team.toString())
     }
 
     override fun nextTuple() {
-        Utils.sleep(2000)
-        val sportString = redisConnection.rpoplpush("data", "team")
+//        Utils.sleep(7500)
+        val sportString = redisConnection.rpop("data")
 
-        if(sportString.isNullOrEmpty()) {
+        if (sportString.isNullOrEmpty()) {
             return
         } else {
-            collector?.emit(Values(sportString))
+//            collector?.emit(Values(sportString))
+            // Anchored ( ack )
+            collector?.emit(Values(sportString), sportString)
         }
 
         Thread.yield()
