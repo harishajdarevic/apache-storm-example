@@ -21,8 +21,14 @@ class SaveTeamBolt: BaseRichBolt() {
     }
 
     override fun execute(tuple: Tuple?) {
-        Utils.sleep(14000)
-        collector?.ack(tuple)
+        try {
+            Utils.sleep(14000)
+            println("bolt executed")
+            collector?.ack(tuple)
+        }  catch (e: Exception) {
+
+            collector?.fail(tuple)
+        }
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer?) {

@@ -24,6 +24,11 @@ class TeamSpout: BaseRichSpout() {
     lateinit var redisClient: RedisClient
     lateinit var redisConnection: RedisConnection<String, String>
 
+    override fun activate() {
+        redisClient = RedisClient("localhost", 7777)
+        redisConnection = redisClient.connect()
+    }
+
     override fun open(
         conf: MutableMap<String, Any>?,
         context: TopologyContext?,
@@ -31,27 +36,32 @@ class TeamSpout: BaseRichSpout() {
     ) {
         collector = sportOutputCollector
         _rand = Random()
-
-        redisClient = RedisClient("localhost", 7777)
-        redisConnection = redisClient.connect()
     }
 
     override fun ack(team: Any?) {
-        Utils.sleep(500)
+//        Utils.sleep(500)
         println("tupple successfully processed")
-//        redisConnection.rpush("team", team.toString())
+        redisConnection.rpush("team", team.toString())
+    }
+
+    override fun fail(msgId: Any?) {
+        println("failed")
     }
 
     override fun nextTuple() {
-        Utils.sleep(500)
-        val sportString = redisConnection.rpoplpush("data", "team")
-
+        println("nextTuple spout...")
+//        Utils.sleep(3000)
+//        val sportString = redisConnection.rpoplpush("data", "team")
+        val sportString = redisConnection.rpop("data")
+        println("nextTuple data ${sportString}")
         if (sportString.isNullOrEmpty()) {
+
+            Thread.yield()
             return
         } else {
-            collector?.emit(Values(sportString))
+//            collector?.emit(Values(sportString))
             // Anchored ( ack )
-//            collector?.emit(Values(sportString), sportString)
+            collector?.emit(Values(sportString), sportString)
         }
 
         Thread.yield()
