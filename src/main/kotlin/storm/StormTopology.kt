@@ -18,7 +18,7 @@ class StormTopology {
         fun main(args: Array<String>) {
             val builder = TopologyBuilder()
 
-            builder.setSpout(spoutId, TeamSpout(), 10)
+            builder.setSpout(spoutId, TeamSpout(true), 10)
             builder.setBolt(boltId, SaveTeamBolt(), 10).shuffleGrouping(spoutId)
 
             val conf = Config()
