@@ -1,8 +1,5 @@
 package storm.bolt
 
-import com.google.gson.Gson
-import com.lambdaworks.redis.RedisClient
-import com.lambdaworks.redis.RedisConnection
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -23,10 +20,8 @@ class SaveTeamBolt: BaseRichBolt() {
     override fun execute(tuple: Tuple?) {
         try {
             Utils.sleep(14000)
-            println("bolt executed")
             collector?.ack(tuple)
         }  catch (e: Exception) {
-
             collector?.fail(tuple)
         }
     }

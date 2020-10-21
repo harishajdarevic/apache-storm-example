@@ -1,26 +1,17 @@
 package storm.spout
 
-import com.google.gson.Gson
 import com.lambdaworks.redis.RedisClient
 import com.lambdaworks.redis.RedisConnection
-import com.lambdaworks.redis.pubsub.RedisPubSubAdapter
-import com.lambdaworks.redis.pubsub.RedisPubSubConnection
-import com.lambdaworks.redis.pubsub.RedisPubSubListener
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
 import org.apache.storm.tuple.Fields
 import org.apache.storm.tuple.Values
-import org.apache.storm.utils.Utils
-import storm.data.Sport
-import java.util.*
 
-
-class TeamSpout: BaseRichSpout() {
+class TeamSpout(private val reliable: Boolean = false): BaseRichSpout() {
 
     private var collector: SpoutOutputCollector? = null
-    lateinit var _rand: Random
     lateinit var redisClient: RedisClient
     lateinit var redisConnection: RedisConnection<String, String>
 
@@ -35,33 +26,30 @@ class TeamSpout: BaseRichSpout() {
         sportOutputCollector: SpoutOutputCollector?
     ) {
         collector = sportOutputCollector
-        _rand = Random()
     }
 
     override fun ack(team: Any?) {
-//        Utils.sleep(500)
-        println("tupple successfully processed")
         redisConnection.rpush("team", team.toString())
     }
 
-    override fun fail(msgId: Any?) {
-        println("failed")
+    override fun fail(team: Any?) {
+        redisConnection.rpush("data", team.toString())
     }
 
     override fun nextTuple() {
-        println("nextTuple spout...")
-//        Utils.sleep(3000)
-//        val sportString = redisConnection.rpoplpush("data", "team")
-        val sportString = redisConnection.rpop("data")
-        println("nextTuple data ${sportString}")
-        if (sportString.isNullOrEmpty()) {
 
+        val sportString = redisConnection.rpop( "data")
+
+        if (sportString.isNullOrEmpty()) {
             Thread.yield()
             return
         } else {
-//            collector?.emit(Values(sportString))
-            // Anchored ( ack )
-            collector?.emit(Values(sportString), sportString)
+            if (reliable) {
+                collector?.emit(Values(sportString), sportString)
+            } else {
+                collector?.emit(Values(sportString))
+            }
+
         }
 
         Thread.yield()
